@@ -1,0 +1,23 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  InterphlixAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: interphlix-auth
+      Handler: app.lambda_handler
+      Runtime: provided.al2
+      CodeUri: ./target/lambda/auth/bootstrap.zip
+      Architectures:
+        - arm64
+      Events:
+        Login:
+          Type: HttpApi
+          Properties:
+            Path: /login
+            Method: get
+        Redirect:
+          Type: HttpApi
+          Properties:
+            Path: /redirect
+            Method: get

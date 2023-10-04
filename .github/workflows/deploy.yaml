@@ -1,0 +1,50 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - master  # Adjust to the branch you want to trigger the deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install Zig toolchain
+        uses: korandoru/setup-zig@v1
+        with:
+          zig-version: 0.10.0
+      - name: Install Cargo Lambda
+        uses: jaxxstorm/action-install-gh-release@v1.9.0
+        with:
+          repo: cargo-lambda/cargo-lambda
+          platform: linux # Other valid options: 'windows' or 'darwin'
+          arch: arm64 # 
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10  # Adjust the Python version as needed
+
+    - name: Install AWS CLI and SAM CLI
+      run: |
+        pip install awscli
+        pip install aws-sam-cli
+
+    - name: Configure AWS credentials
+      run: |
+        echo -e "[default]\naws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}\naws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+
+    - name: Compile Rust Code
+    - run: cargo lambda build --release --output-format zip --arm64
+
+    - name: Package SAM application
+      run: sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket interphlix-code
+
+    - name: Deploy SAM application
+      run: sam deploy --template-file packaged.yaml --stack-name interphlix --capabilities CAPABILITY_IAM --region us-east-1

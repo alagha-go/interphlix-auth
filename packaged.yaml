@@ -1,0 +1,24 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  InterphlixAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: interphlix-auth
+      Handler: app.lambda_handler
+      Runtime: provided.al2
+      CodeUri: s3://interphlix-code/d6db13e8189d8d49c108c95753fbdf7c
+      Architectures:
+      - arm64
+      Events:
+        Login:
+          Type: HttpApi
+          Properties:
+            Path: /login
+            Method: get
+        Redirect:
+          Type: HttpApi
+          Properties:
+            Path: /redirect
+            Method: get
+    Metadata:
+      SamResourceId: InterphlixAuthFunction
