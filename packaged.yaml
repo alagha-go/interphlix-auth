@@ -20,5 +20,10 @@ Resources:
           Properties:
             Path: /redirect
             Method: get
+        Token:
+          Type: HttpApi
+          Properties:
+            Path: /token
+            Method: get
     Metadata:
       SamResourceId: InterphlixAuthFunction

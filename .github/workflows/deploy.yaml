@@ -61,6 +61,7 @@ jobs:
 
       - name: Install AWS CLI and SAM CLI
         run: |
+          export SAM_CLI_AUTOMATION=true
           pip install awscli
           pip install aws-sam-cli
 
@@ -77,4 +78,4 @@ jobs:
         run: sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket interphlix-code
 
       - name: Deploy SAM application
-        run: sam deploy --template-file packaged.yaml --stack-name interphlix -y
+        run: sam deploy --template-file packaged.yaml --stack-name interphlix
