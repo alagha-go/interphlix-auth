@@ -74,6 +74,9 @@ jobs:
       - name: Compile Rust Code
         run: cargo lambda build --release --output-format zip --arm64
 
+      - name: Build SAM application
+        run: sam build
+
       - name: Package SAM application
         run: sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket interphlix-code
 
