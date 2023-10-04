@@ -77,4 +77,4 @@ jobs:
         run: sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket interphlix-code
 
       - name: Deploy SAM application
-        run: sam deploy --template-file packaged.yaml --stack-name interphlix
+        run: sam deploy --template-file packaged.yaml --stack-name interphlix -y
