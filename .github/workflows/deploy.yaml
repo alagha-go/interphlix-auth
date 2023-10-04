@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main  # Adjust to the branch you want to trigger the deployment
+      - master  # Adjust to the branch you want to trigger the deployment
 
 jobs:
   deploy:
@@ -14,15 +14,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Cache Rust and Zig dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          
+
       - name: Install Zig toolchain
         uses: korandoru/setup-zig@v1
         with:
           zig-version: 0.10.0
+
+      - name: Cache Cargo Lambda dependency
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-lambda-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-lambda-
 
       - name: Install Cargo Lambda
         run: cargo install cargo-lambda
@@ -30,11 +46,18 @@ jobs:
       - name: Install arm64 target
         run: rustup target add aarch64-unknown-linux-gnu
 
+      - name: Cache Python, AWS CLI, and SAM CLI
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: ${{ runner.os }}-python-aws-sam-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-aws-sam-
+
       - name: Set up Python 3.10
         run: |
-          sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt-get update
-          sudo apt-get install python3.10
+          sudo apt-get install python3
 
       - name: Install AWS CLI and SAM CLI
         run: |
