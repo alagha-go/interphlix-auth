@@ -25,11 +25,10 @@ jobs:
           zig-version: 0.10.0
 
       - name: Install Cargo Lambda
-        uses: jaxxstorm/action-install-gh-release@v1.9.0
-        with:
-          repo: cargo-lambda/cargo-lambda
-          platform: linux
-          arch: arm64
+        run: cargo install cargo-lambda
+
+      - name: Install arm64 target
+        run: rustup target add aarch64-unknown-linux-gnu
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -41,9 +40,11 @@ jobs:
           pip install awscli
           pip install aws-sam-cli
 
-      - name: Configure AWS credentials
+      - name: Configure AWS CLI
         run: |
-          echo -e "[default]\naws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}\naws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
 
       - name: Compile Rust Code
         run: cargo lambda build --release --output-format zip --arm64
@@ -52,4 +53,4 @@ jobs:
         run: sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket interphlix-code
 
       - name: Deploy SAM application
-        run: sam deploy --template-file packaged.yaml --stack-name interphlix --capabilities CAPABILITY_IAM --region us-east-1
+        run: sam deploy --template-file packaged.yaml --stack-name interphlix
